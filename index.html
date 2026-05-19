@@ -1,1 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ColfFix">
+  <meta name="theme-color" content="#2D2D2D">
+  <title>ColfFix · Expenses</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;background:#F2F2F7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    body{display:flex;flex-direction:column;align-items:center}
+
+    .app{width:100%;max-width:430px;min-height:100vh;background:#F2F2F7;display:flex;flex-direction:column;position:relative}
+
+    /* TOP BAR */
+    .topbar{background:#2D2D2D;padding:52px 18px 14px;display:flex;align-items:flex-end;justify-content:space-between;position:sticky;top:0;z-index:10}
+    .topbar-title{color:#fff;font-size:20px;font-weight:600;letter-spacing:-0.3px}
+    .topbar-orange{color:#E8621A}
+    .topbar-sub{display:flex;align-items:center;gap:5px;color:#888;font-size:11px;margin-top:3px}
+    .gs-dot{width:7px;height:7px;border-radius:50%;background:#34C759;flex-shrink:0}
+    .mnav{display:flex;align-items:center;gap:2px}
+    .marr{background:none;border:none;color:#888;font-size:22px;cursor:pointer;padding:4px 6px;line-height:1}
+    .marr:disabled{opacity:.25}
+    .mlab{color:#aaa;font-size:12px;min-width:80px;text-align:center}
+
+    /* TABS */
+    .tabs{display:flex;background:#2D2D2D;padding:0 18px;gap:0}
+    .tab{flex:1;padding:10px 0 12px;border:none;background:none;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent;font-family:inherit;letter-spacing:0.1px}
+    .tab.on{color:#E8621A;border-bottom:2px solid #E8621A;font-weight:600}
+
+    /* CONTENT */
+    .body{padding:16px;flex:1;overflow-y:auto;padding-bottom:30px}
+
+    /* CARDS */
+    .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .scard{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .slbl{font-size:10px;color:#8E8E93;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;font-weight:500}
+    .sval{font-size:24px;font-weight:600;color:#1C1C1E;letter-spacing:-0.5px}
+    .sval.hi{color:#E8621A}
+    .ssub{font-size:11px;color:#8E8E93;margin-top:3px}
+
+    .card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .sec{font-size:11px;font-weight:600;color:#8E8E93;text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px}
+
+    .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid #F2F2F7}
+    .row:last-child{border-bottom:none}
+    .rname{font-size:14px;font-weight:500;color:#1C1C1E}
+    .rdetail{font-size:12px;color:#8E8E93;margin-top:2px}
+    .ramt{font-size:16px;font-weight:600;color:#E8621A;text-align:right}
+    .rdate{font-size:11px;color:#8E8E93;text-align:right;margin-top:2px}
+    .rdel{font-size:11px;color:#FF3B30;background:none;border:none;cursor:pointer;display:block;margin-top:3px;text-align:right;font-family:inherit}
+
+    .empty{text-align:center;padding:28px 0;color:#8E8E93;font-size:14px;line-height:1.6}
+
+    .add-btn{width:100%;padding:15px;border-radius:14px;background:#E8621A;border:none;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-0.2px;box-shadow:0 4px 14px rgba(232,98,26,.35)}
+    .add-btn:active{transform:scale(.98)}
+
+    .total-foot{border-top:1.5px solid #E8621A;padding-top:12px;margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+
+    /* FORM VIEW */
+    .form-topbar{background:#2D2D2D;padding:52px 18px 14px;display:flex;align-items:flex-end;justify-content:space-between;position:sticky;top:0;z-index:10}
+    .form-title{color:#fff;font-size:18px;font-weight:600}
+    .form-date{color:#888;font-size:12px;margin-top:3px}
+    .cancel-btn{background:none;border:none;color:#E8621A;font-size:15px;cursor:pointer;font-family:inherit;padding:4px}
+
+    .form-body{padding:16px;flex:1;overflow-y:auto;padding-bottom:30px}
+
+    .amt-box{background:#fff;border-radius:14px;padding:22px 18px;text-align:center;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .amt-lbl{font-size:11px;font-weight:600;color:#8E8E93;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+    .amt-row{display:flex;align-items:center;justify-content:center}
+    .doll{font-size:32px;font-weight:300;color:#8E8E93;margin-right:4px}
+    .amt-inp{font-size:48px;font-weight:600;color:#1C1C1E;border:none;background:none;width:180px;text-align:center;outline:none;font-family:inherit;letter-spacing:-1px}
+    .amt-inp::placeholder{color:#C7C7CC}
+
+    .fsec{margin-bottom:16px}
+    .flbl{font-size:11px;font-weight:600;color:#8E8E93;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+
+    .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .cbtn{padding:12px 8px;border-radius:12px;border:1.5px solid #E5E5EA;background:#fff;color:#1C1C1E;font-size:14px;cursor:pointer;text-align:center;font-family:inherit;transition:all .15s}
+    .cbtn.on{border-color:#E8621A;background:rgba(232,98,26,.06);color:#E8621A;font-weight:600}
+    .cbtn:active{transform:scale(.97)}
+
+    .catrow{display:flex;gap:8px;flex-wrap:wrap}
+    .catbtn{padding:8px 14px;border-radius:20px;border:1.5px solid #E5E5EA;background:#fff;color:#1C1C1E;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+    .catbtn.on{background:#E8621A;color:#fff;border-color:#E8621A;font-weight:600}
+    .catbtn:active{transform:scale(.97)}
+
+    .tinp{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid #E5E5EA;font-size:15px;color:#1C1C1E;outline:none;background:#fff;font-family:inherit}
+    .tinp:focus{border-color:#E8621A}
+
+    .save-btn{width:100%;padding:15px;border-radius:14px;background:#E8621A;border:none;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-0.2px;box-shadow:0 4px 14px rgba(232,98,26,.35)}
+    .save-btn:disabled{opacity:.6;cursor:default;box-shadow:none}
+    .save-btn:active{transform:scale(.98)}
+    .back-btn{width:100%;padding:13px;border-radius:14px;border:1.5px solid #E5E5EA;background:#fff;color:#8E8E93;font-size:15px;cursor:pointer;font-family:inherit;margin-top:10px}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;padding:11px 20px;border-radius:22px;font-size:13px;z-index:100;white-space:nowrap;display:none;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+
+    /* VIEWS */
+    #main-view,#form-view{display:flex;flex-direction:column;min-height:100vh}
+    #form-view{display:none}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- MAIN VIEW -->
+  <div id="main-view">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Colf<span class="topbar-orange">Fix</span></div>
+        <div class="topbar-sub"><span class="gs-dot"></span> Syncing to Google Sheets</div>
+      </div>
+      <div class="mnav">
+        <button class="marr" id="prev-m" onclick="changeMonth(-1)">‹</button>
+        <span class="mlab" id="mlab">May 2026</span>
+        <button class="marr" id="next-m" onclick="changeMonth(1)" disabled>›</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" id="tab-home" onclick="setTab('home')">Home</button>
+      <button class="tab" id="tab-hist" onclick="setTab('hist')">History</button>
+    </div>
+    <div class="body" id="body-content"></div>
+  </div>
+
+  <!-- FORM VIEW -->
+  <div id="form-view">
+    <div class="form-topbar">
+      <div>
+        <div class="form-title">Log expense</div>
+        <div class="form-date" id="form-date-lbl"></div>
+      </div>
+      <button class="cancel-btn" onclick="showMain()">Cancel</button>
+    </div>
+    <div class="form-body">
+      <div class="amt-box">
+        <div class="amt-lbl">Amount</div>
+        <div class="amt-row">
+          <span class="doll">$</span>
+          <input class="amt-inp" type="number" inputmode="decimal" placeholder="0.00" id="inp-amt" step="0.01" min="0" autocomplete="off">
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="flbl">Client</div>
+        <div class="cgrid" id="cgrid"></div>
+      </div>
+      <div class="fsec">
+        <div class="flbl">Job # or address</div>
+        <input class="tinp" type="text" placeholder="#1749 or 123 Main St" id="inp-job" autocomplete="off">
+      </div>
+      <div class="fsec">
+        <div class="flbl">Category</div>
+        <div class="catrow" id="catrow"></div>
+      </div>
+      <div class="fsec">
+        <div class="flbl">Note (optional)</div>
+        <input class="tinp" type="text" placeholder="A/C capacitor, dryer belt..." id="inp-note" autocomplete="off">
+      </div>
+      <button class="save-btn" id="save-btn" onclick="saveExpense()">Save expense</button>
+      <button class="back-btn" onclick="showMain()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbypSDzH-vtCQMtO2binWh5dldeDNLGsrb-lT8Ytt_2pw7RiGqib57EF3YIAWFiwrx9Y/exec';
+  const CLIENTS  = ['Envirotek','We Host','Trident','Others'];
+  const CATS     = ['Parts & Materials','Fuel','Tools','Other'];
+
+  let curTab = 'home';
+  let selClient = '';
+  let selCat = 'Parts & Materials';
+  let selMonth = { y: new Date().getFullYear(), m: new Date().getMonth() + 1 };
+  let expenses = [];
+
+  /* ── STORAGE (localStorage) ─────────────────── */
+  function getKey(y, m) { return `cf_exp_${y}_${String(m).padStart(2,'0')}`; }
+  function loadExpenses() {
+    try { expenses = JSON.parse(localStorage.getItem(getKey(selMonth.y, selMonth.m)) || '[]'); }
+    catch(e) { expenses = []; }
+    render();
+  }
+  async function persistExpenses(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  /* ── HELPERS ────────────────────────────────── */
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
+  function fmtMoney(n) { return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+  function fmtDate(s) { return new Date(s + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+  function fmtMonth(y,m) { return new Date(y,m-1).toLocaleDateString('en-US',{month:'long',year:'numeric'}); }
+  function isNow() { const n = new Date(); return selMonth.y===n.getFullYear() && selMonth.m===n.getMonth()+1; }
+  function fmtLoggedAt() {
+    const d = new Date();
+    return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) + ' ' +
+           d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2800);
+  }
+
+  /* ── VIEWS ──────────────────────────────────── */
+  function showMain() {
+    document.getElementById('main-view').style.display = 'flex';
+    document.getElementById('form-view').style.display = 'none';
+    render();
+  }
+  function showForm() {
+    selClient = ''; selCat = 'Parts & Materials';
+    ['inp-amt','inp-job','inp-note'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    document.getElementById('form-date-lbl').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    buildCgrid(); buildCatrow();
+    document.getElementById('main-view').style.display = 'none';
+    document.getElementById('form-view').style.display = 'flex';
+    setTimeout(() => { const el = document.getElementById('inp-amt'); if(el) el.focus(); }, 150);
+  }
+
+  /* ── GOOGLE SHEETS SYNC ─────────────────────── */
+  function sendToSheet(exp) {
+    const d = exp.date.split('-');
+    const payload = {
+      date:     `${d[1]}/${d[2]}/${d[0]}`,
+      client:   exp.client,
+      job:      exp.job,
+      category: exp.cat,
+      amount:   exp.amount,
+      note:     exp.note,
+      loggedAt: exp.loggedAt
+    };
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  }
+
+  /* ── SAVE ───────────────────────────────────── */
+  async function saveExpense() {
+    const amt = parseFloat(document.getElementById('inp-amt').value);
+    if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
+    if (!selClient)        { showToast('Select a client'); return; }
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const exp = {
+      id:       Date.now() + '_' + Math.random().toString(36).substr(2,5),
+      date:     todayStr(),
+      amount:   amt,
+      client:   selClient,
+      job:      document.getElementById('inp-job').value.trim(),
+      cat:      selCat,
+      note:     document.getElementById('inp-note').value.trim(),
+      loggedAt: fmtLoggedAt()
+    };
+    const key = getKey(new Date().getFullYear(), new Date().getMonth()+1);
+    let cur = [];
+    try { cur = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+    cur.unshift(exp);
+    persistExpenses(key, cur);
+    sendToSheet(exp);
+    if (isNow()) expenses = cur;
+    btn.disabled = false; btn.textContent = 'Save expense';
+    showMain();
+    showToast('Saved ✓  Syncing to Google Sheets...');
+  }
+
+  /* ── DELETE ─────────────────────────────────── */
+  function deleteExpense(id) {
+    if (!confirm('Delete this expense?')) return;
+    expenses = expenses.filter(e => e.id !== id);
+    persistExpenses(getKey(selMonth.y, selMonth.m), expenses);
+    render();
+  }
+
+  /* ── MONTH NAV ──────────────────────────────── */
+  function changeMonth(d) {
+    let m = selMonth.m + d, y = selMonth.y;
+    if (m > 12) { m = 1; y++; } if (m < 1) { m = 12; y--; }
+    selMonth = { y, m };
+    document.getElementById('next-m').disabled = isNow();
+    loadExpenses();
+  }
+
+  /* ── TABS ───────────────────────────────────── */
+  function setTab(t) {
+    curTab = t;
+    ['home','hist'].forEach(id => {
+      const el = document.getElementById('tab-' + id);
+      if (el) el.classList.toggle('on', id === t);
+    });
+    render();
+  }
+
+  /* ── FORM BUILDERS ──────────────────────────── */
+  function buildCgrid() {
+    const el = document.getElementById('cgrid');
+    if (el) el.innerHTML = CLIENTS.map(c => `<button class="cbtn${c===selClient?' on':''}" onclick="pickClient('${c}')">${c}</button>`).join('');
+  }
+  function buildCatrow() {
+    const el = document.getElementById('catrow');
+    if (el) el.innerHTML = CATS.map(c => `<button class="catbtn${c===selCat?' on':''}" onclick="pickCat('${c}')">${c}</button>`).join('');
+  }
+  function pickClient(c) { selClient = c; buildCgrid(); }
+  function pickCat(c)    { selCat = c;    buildCatrow(); }
+
+  /* ── RENDER ─────────────────────────────────── */
+  function render() {
+    document.getElementById('mlab').textContent = fmtMonth(selMonth.y, selMonth.m);
+    document.getElementById('prev-m').disabled = false;
+    document.getElementById('next-m').disabled = isNow();
+
+    const today      = todayStr();
+    const todayExps  = expenses.filter(e => e.date === today);
+    const todayTotal = todayExps.reduce((s,e) => s + e.amount, 0);
+    const monthTotal = expenses.reduce((s,e) => s + e.amount, 0);
+    const byClient   = CLIENTS.map(c => ({
+      c, total: expenses.filter(e => e.client===c).reduce((s,e)=>s+e.amount,0),
+      count: expenses.filter(e => e.client===c).length
+    })).filter(x => x.total > 0);
+
+    let html = '';
+
+    if (curTab === 'home') {
+      html += `<div class="stat-row">
+        <div class="scard"><div class="slbl">Today</div><div class="sval${todayTotal>0?' hi':''}">${fmtMoney(todayTotal)}</div><div class="ssub">${todayExps.length} expense${todayExps.length!==1?'s':''}</div></div>
+        <div class="scard"><div class="slbl">This month</div><div class="sval">${fmtMoney(monthTotal)}</div><div class="ssub">${expenses.length} total</div></div>
+      </div>`;
+
+      if (byClient.length > 0) {
+        html += `<div class="card"><div class="sec">By client</div>`;
+        byClient.forEach(({c,total,count}) => {
+          const pct = monthTotal > 0 ? Math.round(total/monthTotal*100) : 0;
+          html += `<div class="row"><div><div class="rname">${c}</div><div class="rdetail">${count} expense${count!==1?'s':''}</div></div><div><div class="ramt">${fmtMoney(total)}</div><div class="rdate">${pct}%</div></div></div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `<div class="card"><div class="sec">Recent</div>`;
+      if (expenses.length === 0) {
+        html += `<div class="empty">No expenses yet<br>Tap the button below to add your first</div>`;
+      } else {
+        expenses.slice(0,6).forEach(e => {
+          html += `<div class="row"><div><div class="rname">${e.client}${e.job?` <span style="font-weight:400;font-size:12px;color:#8E8E93">· ${e.job}</span>`:''}</div><div class="rdetail">${e.cat}${e.note?' · '+e.note:''}</div></div><div><div class="ramt">${fmtMoney(e.amount)}</div><div class="rdate">${fmtDate(e.date)}</div></div></div>`;
+        });
+      }
+      html += `</div><button class="add-btn" onclick="showForm()">+ Add expense</button>`;
+    }
+
+    if (curTab === 'hist') {
+      html += `<div class="card"><div class="sec">All — ${fmtMonth(selMonth.y, selMonth.m)}</div>`;
+      if (expenses.length === 0) {
+        html += `<div class="empty">No expenses for this month</div>`;
+      } else {
+        expenses.forEach(e => {
+          html += `<div class="row"><div><div class="rname">${e.client}${e.job?` <span style="font-weight:400;font-size:12px;color:#8E8E93">· ${e.job}</span>`:''}</div><div class="rdetail">${e.cat}${e.note?' · '+e.note:''}</div></div><div><div class="ramt">${fmtMoney(e.amount)}</div><div class="rdate">${fmtDate(e.date)}</div><button class="rdel" onclick="deleteExpense('${e.id}')">delete</button></div></div>`;
+        });
+        html += `<div class="total-foot"><span style="font-size:14px;font-weight:600;color:#1C1C1E">Total</span><span style="font-size:20px;font-weight:700;color:#E8621A">${fmtMoney(monthTotal)}</span></div>`;
+      }
+      html += `</div><button class="add-btn" onclick="showForm()">+ Add expense</button>`;
+    }
+
+    const bc = document.getElementById('body-content');
+    if (bc) bc.innerHTML = html;
+  }
+
+  loadExpenses();
+</script>
+</body>
+</html>
 
